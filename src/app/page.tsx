@@ -1,9 +1,13 @@
+import { HomeMain } from "@/components/sites/insarag/home-main";
+import { SiteFooter } from "@/components/sites/insarag/site-footer";
+import { SiteHeader } from "@/components/sites/insarag/site-header";
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <p className="text-muted-foreground">
-        Clone target not yet built. Run <code className="font-mono text-foreground">/clone-website</code> to start.
-      </p>
-    </main>
+    <>
+      <SiteHeader />
+      <HomeMain />
+      <SiteFooter />
+    </>
   );
 }
