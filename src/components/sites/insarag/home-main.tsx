@@ -1,28 +1,21 @@
-import {
-  capacityCards,
-  operationCards,
-  sourcePath,
-  volumes,
-} from "@/components/sites/insarag/content";
+import { sourcePath } from "@/components/sites/insarag/content";
+import { getMessages, type Locale } from "@/components/sites/insarag/messages";
 
-export function HomeMain() {
+export function HomeMain({ locale }: { locale: Locale }) {
+  const copy = getMessages(locale);
   return (
     <div id="content">
       <header className="hero">
         <div className="hero-inner">
-          <img
-            className="brand-logo"
-            src="/sites/insarag/insarag-logo.svg"
-            alt="INSARAG Preparedness Response"
-          />
-          <h1 className="hero-title">INSARAG Guidelines</h1>
-          <p className="hero-subtitle">2026 - 2030</p>
+          <img className="brand-logo" src="/sites/insarag/insarag-logo.svg" alt={copy.chrome.brandAlt} />
+          <h1 className="hero-title">{copy.chrome.heroTitle}</h1>
+          <p className="hero-subtitle">{copy.chrome.heroSubtitle}</p>
           <div className="hero-buttons">
             <a className="hero-btn hero-btn-primary" href={sourcePath("/fundamentals/intro")}>
-              Get Started →
+              {copy.chrome.getStarted}
             </a>
             <a className="hero-btn hero-btn-ghost" href={sourcePath("/glossary")}>
-              Glossary →
+              {copy.chrome.glossary}
             </a>
           </div>
         </div>
@@ -39,17 +32,17 @@ export function HomeMain() {
         <section className="band" aria-labelledby="capacity-heading">
           <div className="container">
             <h2 className="section-title" id="capacity-heading">
-              Learn More About USAR Capacity
+              {copy.chrome.capacityHeading}
             </h2>
             <div className="grid-3">
-              {capacityCards.map((card) => (
-                <a className="topic-card" href={sourcePath(card.href)} key={card.title}>
+              {copy.capacityCards.map((card) => (
+                <a className="topic-card" href={sourcePath(card.href)} key={card.href}>
                   <div className="card-icon" aria-hidden="true">
                     <span>{card.icon}</span>
                   </div>
                   <h3 className="card-title">{card.title}</h3>
                   <p className="card-description">{card.description}</p>
-                  <span className="card-more">Learn more →</span>
+                  <span className="card-more">{copy.chrome.learnMore}</span>
                 </a>
               ))}
             </div>
@@ -58,17 +51,17 @@ export function HomeMain() {
         <section className="band" aria-labelledby="operations-heading">
           <div className="container">
             <h2 className="section-title" id="operations-heading">
-              Explore USAR Operations
+              {copy.chrome.operationsHeading}
             </h2>
             <div className="grid-4">
-              {operationCards.map((card) => (
-                <a className="topic-card" href={sourcePath(card.href)} key={card.title}>
+              {copy.operationCards.map((card) => (
+                <a className="topic-card" href={sourcePath(card.href)} key={card.href}>
                   <div className="card-icon" aria-hidden="true">
                     <span>{card.icon}</span>
                   </div>
                   <h3 className="card-title">{card.title}</h3>
                   <p className="card-description">{card.description}</p>
-                  <span className="card-more">Learn more →</span>
+                  <span className="card-more">{copy.chrome.learnMore}</span>
                 </a>
               ))}
             </div>
@@ -77,12 +70,12 @@ export function HomeMain() {
         <section className="band" aria-labelledby="volumes-heading">
           <div className="container">
             <h2 className="section-title" id="volumes-heading">
-              Volumes
+              {copy.chrome.volumesHeading}
             </h2>
-            <p className="section-subtitle">Download the INSARAG Guidelines volumes as Word files.</p>
+            <p className="section-subtitle">{copy.chrome.volumesSubtitle}</p>
             <div className="grid-5">
-              {volumes.map((volume) => (
-                <a className="volume-card" href={sourcePath(volume.href)} key={volume.title}>
+              {copy.volumes.map((volume) => (
+                <a className="volume-card" href={sourcePath(volume.href)} key={volume.href}>
                   <span className="volume-badge">PDF</span>
                   <strong>{volume.title}</strong>
                   <span className="volume-sub">{volume.subtitle}</span>

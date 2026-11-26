@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { sourcePath } from "@/components/sites/insarag/content";
+import { fill, type Locale, type Messages } from "@/components/sites/insarag/messages";
 
 type SearchDoc = {
   t: string;
@@ -17,7 +18,10 @@ type Hit = {
   snippet: string;
 };
 
-const SEARCH_INDEX = "/sites/insarag/search-pages.json";
+const SEARCH_INDEX: Record<Locale, string> = {
+  en: "/sites/insarag/search-pages.json",
+  ro: "/sites/insarag/search-pages.ro.json",
+};
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -97,7 +101,7 @@ function buildHits(docs: SearchDoc[], query: string): Hit[] {
   return hits;
 }
 
-export function SearchBox() {
+export function SearchBox({ locale, copy }: { locale: Locale; copy: Messages["chrome"] }) {
   const listId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -129,7 +133,7 @@ export function SearchBox() {
   useEffect(() => {
     if (!open || docs) return;
     let cancelled = false;
-    fetch(SEARCH_INDEX)
+    fetch(SEARCH_INDEX[locale])
       .then((response) => response.json())
       .then((data: SearchDoc[]) => {
         if (!cancelled) setDocs(data);
@@ -140,7 +144,7 @@ export function SearchBox() {
     return () => {
       cancelled = true;
     };
-  }, [open, docs]);
+  }, [open, docs, locale]);
 
   const hits = useMemo(() => buildHits(docs ?? [], query), [docs, query]);
 
@@ -178,8 +182,8 @@ export function SearchBox() {
         ref={inputRef}
         className="search-input"
         type="text"
-        placeholder="Search"
-        aria-label="Search"
+        placeholder={copy.searchPlaceholder}
+        aria-label={copy.searchLabel}
         role="combobox"
         aria-expanded={showPanel}
         aria-controls={listId}
@@ -197,7 +201,7 @@ export function SearchBox() {
         <button
           className="search-clear"
           type="button"
-          aria-label="Clear search"
+          aria-label={copy.clearSearch}
           onClick={() => {
             setQuery("");
             inputRef.current?.focus();
@@ -213,9 +217,9 @@ export function SearchBox() {
       </span>
       {showPanel ? (
         <div className="search-panel" id={listId} role="listbox">
-          {docs === null ? <p className="search-empty">Loading results…</p> : null}
+          {docs === null ? <p className="search-empty">{copy.loadingResults}</p> : null}
           {docs !== null && hits.length === 0 ? (
-            <p className="search-empty">No results for “{query.trim()}”.</p>
+            <p className="search-empty">{fill(copy.noResults, { query: query.trim() })}</p>
           ) : null}
           {hits.map((hit, index) => (
             <a
@@ -258,7 +262,7 @@ export function SearchBox() {
             </a>
           ))}
           <a className="search-all" href={sourcePath(`/search?q=${encodeURIComponent(query.trim())}`)}>
-            See all results
+            {copy.seeAllResults}
           </a>
         </div>
       ) : null}

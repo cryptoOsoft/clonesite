@@ -5,9 +5,9 @@ import { SiteHeader } from "@/components/sites/insarag/site-header";
 export default function Home() {
   return (
     <>
-      <SiteHeader />
-      <HomeMain />
-      <SiteFooter />
+      <SiteHeader locale="en" />
+      <HomeMain locale="en" />
+      <SiteFooter locale="en" />
     </>
   );
 }

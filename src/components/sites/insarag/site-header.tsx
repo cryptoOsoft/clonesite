@@ -2,52 +2,59 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { navigation, sourcePath, type NavItem } from "@/components/sites/insarag/content";
+import { sourcePath } from "@/components/sites/insarag/content";
+import {
+  fill,
+  getMessages,
+  type Locale,
+  type Messages,
+  type NavItem,
+  type ThemeChoice,
+} from "@/components/sites/insarag/messages";
 import { SearchBox } from "@/components/sites/insarag/search-box";
 
-type ThemeChoice = "light" | "dark" | "system";
-
-function applyTheme(choice: ThemeChoice) {
+function applyTheme(choice: ThemeChoice, chrome: Messages["chrome"]) {
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const theme = choice === "system" ? (systemDark ? "dark" : "light") : choice;
   document.documentElement.setAttribute("data-theme", theme);
   document.documentElement.setAttribute("data-theme-choice", choice);
   if (choice === "system") localStorage.removeItem("theme");
   else localStorage.setItem("theme", choice);
-  const title = `${choice} mode`;
-  const aria = `Switch between dark and light mode (currently ${choice} mode)`;
+  const mode = chrome.themeModes[choice];
+  const title = fill(chrome.themeTitle, { mode });
+  const aria = fill(chrome.themeAria, { mode });
   document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]").forEach((button) => {
     button.title = title;
     button.setAttribute("aria-label", aria);
   });
 }
 
-function ThemeToggle({ className }: { className?: string }) {
+function ThemeToggle({ className, chrome }: { className?: string; chrome: Messages["chrome"] }) {
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     const choice: ThemeChoice = stored === "light" || stored === "dark" ? stored : "system";
-    applyTheme(choice);
+    applyTheme(choice, chrome);
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => {
       const current = document.documentElement.getAttribute("data-theme-choice");
-      if (current === "system" || !current) applyTheme("system");
+      if (current === "system" || !current) applyTheme("system", chrome);
     };
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
-  }, []);
+  }, [chrome]);
 
   return (
     <button
       className={`theme-toggle${className ? ` ${className}` : ""}`}
       type="button"
       data-theme-toggle
-      title="system mode"
-      aria-label="Switch between dark and light mode (currently system mode)"
+      title={fill(chrome.themeTitle, { mode: chrome.themeModes.system })}
+      aria-label={fill(chrome.themeAria, { mode: chrome.themeModes.system })}
       onClick={() => {
         const current = document.documentElement.getAttribute("data-theme-choice");
         const next: ThemeChoice =
           current === "system" || !current ? "light" : current === "light" ? "dark" : "system";
-        applyTheme(next);
+        applyTheme(next, chrome);
       }}
     >
       <svg className="theme-icon theme-icon-light" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
@@ -112,9 +119,28 @@ function MenuLinks({ item }: { item: NavItem }) {
   );
 }
 
-export function SiteHeader() {
+function LocaleSwitch({ locale, label }: { locale: Locale; label: string }) {
+  return (
+    <nav className="locale-switch" aria-label={label}>
+      <Link href="/" hrefLang="en" lang="en" aria-current={locale === "en" ? "page" : undefined}>
+        EN
+      </Link>
+      <Link href="/ro" hrefLang="ro" lang="ro" aria-current={locale === "ro" ? "page" : undefined}>
+        RO
+      </Link>
+    </nav>
+  );
+}
+
+export function SiteHeader({ locale }: { locale: Locale }) {
+  const copy = getMessages(locale);
+  const homeHref = locale === "ro" ? "/ro" : "/";
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -134,14 +160,14 @@ export function SiteHeader() {
   return (
     <header className={`navbar${open ? " nav-open" : ""}`}>
       <a className="skip-link" href="#content">
-        Skip to main content
+        {copy.chrome.skip}
       </a>
       <div className="navbar-inner">
         <div className="navbar-left">
           <button
             className="nav-toggle"
             type="button"
-            aria-label="Toggle navigation bar"
+            aria-label={copy.chrome.toggleNav}
             aria-expanded={open}
             onClick={() => setOpen((value) => !value)}
           >
@@ -155,11 +181,11 @@ export function SiteHeader() {
               />
             </svg>
           </button>
-          <Link className="brand" href="/">
-            <img src="/sites/insarag/insarag-logo.svg" alt="INSARAG Preparedness Response logo" />
+          <Link className="brand" href={homeHref}>
+            <img src="/sites/insarag/insarag-logo.svg" alt={copy.chrome.logoAlt} />
           </Link>
-          <nav className="desktop-nav" aria-label="Main">
-            {navigation.map((item) => (
+          <nav className="desktop-nav" aria-label={copy.chrome.mainNav}>
+            {copy.navigation.map((item) => (
               <div className="nav-item" key={item.label}>
                 <button className="nav-trigger" type="button" aria-haspopup="true">
                   {item.label}
@@ -172,18 +198,19 @@ export function SiteHeader() {
           </nav>
         </div>
         <div className="navbar-right">
-          <ThemeToggle className="navbar-theme" />
-          <SearchBox />
+          <LocaleSwitch locale={locale} label={copy.chrome.language} />
+          <ThemeToggle className="navbar-theme" chrome={copy.chrome} />
+          <SearchBox locale={locale} copy={copy.chrome} />
         </div>
       </div>
       <div className="backdrop" onClick={() => setOpen(false)} />
-      <div className="drawer" role="dialog" aria-label="Navigation" aria-modal={open} inert={!open}>
+      <div className="drawer" role="dialog" aria-label={copy.chrome.navigation} aria-modal={open} inert={!open}>
         <div className="drawer-brand">
-          <Link className="brand" href="/" onClick={() => setOpen(false)}>
-            <img src="/sites/insarag/insarag-logo.svg" alt="INSARAG Preparedness Response logo" />
+          <Link className="brand" href={homeHref} onClick={() => setOpen(false)}>
+            <img src="/sites/insarag/insarag-logo.svg" alt={copy.chrome.logoAlt} />
           </Link>
-          <ThemeToggle />
-          <button className="drawer-close" type="button" aria-label="Close navigation" onClick={() => setOpen(false)}>
+          <ThemeToggle chrome={copy.chrome} />
+          <button className="drawer-close" type="button" aria-label={copy.chrome.closeNav} onClick={() => setOpen(false)}>
             <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
               <path
                 fill="currentColor"
@@ -193,7 +220,7 @@ export function SiteHeader() {
           </button>
         </div>
         <ul className="drawer-list">
-          {navigation.map((item) => {
+          {copy.navigation.map((item) => {
             const isOpen = expanded === item.label;
             return (
               <li className={`drawer-section${isOpen ? " open" : ""}`} key={item.label}>
