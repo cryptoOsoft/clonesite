@@ -1,4 +1,5 @@
-import { legalLinks, socialLinks, sourcePath } from "@/components/sites/insarag/content";
+import { socialLinks, sourcePath } from "@/components/sites/insarag/content";
+import { getMessages, type Locale } from "@/components/sites/insarag/messages";
 
 function SocialIcon({ label }: { label: (typeof socialLinks)[number]["label"] }) {
   if (label === "Facebook") {
@@ -31,23 +32,24 @@ function SocialIcon({ label }: { label: (typeof socialLinks)[number]["label"] })
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ locale }: { locale: Locale }) {
+  const copy = getMessages(locale);
   return (
     <footer className="site-footer">
       <div className="footer-accent" />
       <div className="footer-inner">
         <div className="footer-content">
-          <img className="footer-logo" src="/sites/insarag/ocha-logo.svg" alt="OCHA logo" />
+          <img className="footer-logo" src="/sites/insarag/ocha-logo.svg" alt={copy.chrome.ochaAlt} />
           <div className="footer-copy">
-            <nav className="social-links" aria-label="Social media links">
+            <nav className="social-links" aria-label={copy.chrome.socialNav}>
               {socialLinks.map((link) => (
                 <a key={link.label} href={link.href} target="_blank" rel="noreferrer" aria-label={link.label}>
                   <SocialIcon label={link.label} />
                 </a>
               ))}
             </nav>
-            <nav className="legal-links" aria-label="Legal links">
-              {legalLinks.flatMap((link, index) => {
+            <nav className="legal-links" aria-label={copy.chrome.legalNav}>
+              {copy.legalLinks.flatMap((link, index) => {
                 const anchor = (
                   <a key={link.href} href={sourcePath(link.href)}>
                     {link.label}
@@ -62,13 +64,9 @@ export function SiteFooter() {
                 ];
               })}
             </nav>
-            <p className="copyright">
-              © 2026 United Nations Office for the Coordination of Humanitarian Affairs (OCHA).
-            </p>
-            <p className="disclaimer">
-              The information provided on this website does not necessarily reflect the views of the United
-              Nations, OCHA, INSARAG, or the participating organisations. Created by USAR.NL.
-            </p>
+            <p className="copyright">{copy.chrome.copyright}</p>
+            <p className="disclaimer">{copy.chrome.disclaimer}</p>
+            {copy.chrome.unofficial ? <p className="disclaimer">{copy.chrome.unofficial}</p> : null}
           </div>
         </div>
       </div>

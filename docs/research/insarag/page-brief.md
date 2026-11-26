@@ -1,7 +1,7 @@
 # INSARAG Guidelines homepage
 
 Source: https://insarag-guidelines.netlify.app/
-Local route: `/`
+Local routes: `/` (English) and `/ro` (Romanian). Guideline pages stay on the source origin.
 Files: `src/app/page.tsx`, `src/app/insarag.css`, `src/components/sites/insarag/*`, `public/sites/insarag/*`
 
 ## Section order
